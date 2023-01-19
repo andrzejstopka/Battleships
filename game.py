@@ -22,6 +22,9 @@ class Board():
  
         if input[1] not in ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]:
             return False
+        
+        if input[-1] not in ["h", "v", "i"]:
+            return False
  
         return True
  
@@ -35,44 +38,68 @@ class Board():
             number = input[1] + input[2]
             return ord(input[0]) - 65, int(number) - 1, input[3]
     
+    def convert_user_input_for_destroyer(self, input):
+        ### It must be different from convert_user_input because it is not worth to get horizon for 1-place ship
+
+        length = len(input)
+        if length == 3:
+            return ord(input[0]) - 65, int(input[1]) - 1
+        elif length == 4:
+            number = input[1] + input[2]
+            return ord(input[0]) - 65, int(number) - 1
+    
     def place_user_ships(self):
         # Game ships
         for ship in self.ships:
-            user_input = input(
-                f"Enter a start coordinates and horizon(h/v) for {ship.name}({ship.occupied_spaces()} spaces) (e.g. A1v): ")
-            if self.check_user_input(user_input) is False:
-                print("Invalid input")
-                continue
-            x, y, h = self.convert_user_input(user_input)   # h - horizon
-            places = []  # checked places, ship is not added when is checked because it would corrupt check_ship_surrounding function
-            ship_occupied_spaces = ship.occupied_spaces()
-            if h == "h":
-                if y + ship_occupied_spaces > 10:  # check if ship crosses the border 
-                    print("Invalid input (The ship crosses the border)")
+            if ship.name != "Destroyer":
+                user_input = input(
+                    f"Enter a start coordinates and horizon(h/v) for {ship.name}({ship.occupied_spaces()} spaces) (e.g. A1v): ")
+                if self.check_user_input(user_input) is False:
+                    print("Invalid input")
                     continue
-                for space in range(ship_occupied_spaces):
-                    if self.check_ship_surrounding(x, y + space) is False: # when any piece of ship is wrong, ship is not addded.
-                        print("Invalid space")
-                        break
-                    places.append((x, y + space)) 
-            elif h == "v":
-                if x + ship_occupied_spaces > 10:   # check if ship crosses the border 
-                    print("Invalid input (The ship crosses the border)")
+                x, y, h = self.convert_user_input(user_input)   # h - horizon
+                places = []  # checked places, ship is not added when is checked because it would corrupt check_ship_surrounding function
+                ship_occupied_spaces = ship.occupied_spaces()
+                if h == "h":
+                    if y + ship_occupied_spaces > 10:  # check if ship crosses the border 
+                        print("Invalid input (The ship crosses the border)")
+                        continue
+                    for space in range(ship_occupied_spaces):
+                        if self.check_ship_surrounding(x, y + space) is False: # when any piece of ship is wrong, ship is not addded.
+                            print("Invalid space")
+                            break
+                        places.append((x, y + space)) 
+                elif h == "v":
+                    if x + ship_occupied_spaces > 10:   # check if ship crosses the border 
+                        print("Invalid input (The ship crosses the border)")
+                        continue
+                    for space in range(ship_occupied_spaces):
+                        if self.check_ship_surrounding(x + space, y) is False: # when any piece of ship is wrong, ship is not addded.
+                            print("Invalid space")
+                            break
+                        places.append((x + space, y))
+                if len(places) == ship_occupied_spaces:
+                    for place in places:
+                            self.board[place[0]][place[1]] = "0"   # if all spaces is correct, ship is added to the board
+            elif ship.name == "Destroyer":
+                user_input = input(
+                    f"Enter a coordinates for {ship.name}(e.g. A1): ") + "i" # "i" means indifferent to use check_user_input
+                if self.check_user_input(user_input) is False:
+                    print("Invalid input")
                     continue
-                for space in range(ship_occupied_spaces):
-                    if self.check_ship_surrounding(x + space, y) is False: # when any piece of ship is wrong, ship is not addded.
-                        print("Invalid space")
-                        break
-                    places.append((x + space, y))
-            if len(places) == ship_occupied_spaces:
-                for place in places:
-                        self.board[place[0]][place[1]] = "0"   # if all spaces is correct, ship is added to the board
-            self.show_board()
+                x, y = self.convert_user_input_for_destroyer(user_input)
+                if self.check_ship_surrounding(x, y):
+                    self.board[x][y] = "0"
+                else:
+                    print("Space is already occupied!")
+
             
  
     def check_ship_surrounding(self, x, y):
         # check if any surrounding spaces are occupied
         try:
+            if self.board[x][y] != "~":
+                return False
             if self.board[x - 1][y] != "~":
                 return False
             elif self.board[x + 1][y] != "~":
