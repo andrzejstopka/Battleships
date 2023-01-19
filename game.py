@@ -1,8 +1,8 @@
 class Board():
     def __init__(self):
         self.board = [["~"] * 10 for _ in range(10)]
-        self.ships = [Ship("Battleship"), Ship("Cruiser"), Ship("Cruiser"), Ship("Submarine"), \
-            Ship("Submarine"), Ship("Submarine"), Ship("Destroyer"), Ship("Destroyer"), Ship("Destroyer"), Ship("Destroyer")]
+        self.ships = [Ship("Battleship"), Ship("Cruiser"), Ship("Cruiser"), Ship("Submarine"),
+                      Ship("Submarine"), Ship("Submarine"), Ship("Destroyer"), Ship("Destroyer"), Ship("Destroyer"), Ship("Destroyer")]
 
     def show_board(self):
         letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
@@ -11,7 +11,6 @@ class Board():
         for x in letters:
             print(x, self.board[board_row])
             board_row += 1
-
 
     def check_user_input(self, input):
         ### Checks if the user input is valid ###
@@ -26,7 +25,6 @@ class Board():
 
         return True
 
-
     def convert_user_input(self, input):
         ### Converts the user input to a coordinate example. A1 -> 0, 0, B10 -> 1, 9 ###
 
@@ -36,13 +34,12 @@ class Board():
         elif length == 4 and input[3] in ["v", "h"]:
             number = input[1] + input[2]
             return ord(input[0]) - 65, int(number) - 1, input[3]
-        
-
 
     def place_user_ships(self):
         # Game ships
         for ship in self.ships:
-            user_input = input(f"Enter a start coordinates and horizon(h/v) for {ship.name}({ship.occupied_spaces()} spaces) (e.g. A1v): ")
+            user_input = input(
+                f"Enter a start coordinates and horizon(h/v) for {ship.name}({ship.occupied_spaces()} spaces) (e.g. A1v): ")
             if self.check_user_input(user_input) is False:
                 print("Invalid input")
                 continue
@@ -53,7 +50,7 @@ class Board():
             elif h == "v":
                 for space in range(ship.occupied_spaces()):
                     self.board[x + space][y] = "0"
-                    
+
 
 class Ship:
     def __init__(self, name):
@@ -72,6 +69,7 @@ class Ship:
 #############################################################
 #                      Main Game                            #
 #############################################################
+
 
 server_board = Board()
 server_shot_board = Board()
