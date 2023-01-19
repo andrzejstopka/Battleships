@@ -34,7 +34,7 @@ class Board():
         elif length == 4 and input[3] in ["v", "h"]:
             number = input[1] + input[2]
             return ord(input[0]) - 65, int(number) - 1, input[3]
- 
+    
     def place_user_ships(self):
         # Game ships
         for ship in self.ships:
@@ -45,23 +45,30 @@ class Board():
                 continue
             x, y, h = self.convert_user_input(user_input)   # h - horizon
             places = []  # checked places, ship is not added when is checked because it would corrupt check_ship_surrounding function
+            ship_occupied_spaces = ship.occupied_spaces()
             if h == "h":
-                for space in range(ship.occupied_spaces()):
+                if y + ship_occupied_spaces > 10:  # check if ship crosses the border 
+                    print("Invalid input (The ship crosses the border)")
+                    continue
+                for space in range(ship_occupied_spaces):
                     if self.check_ship_surrounding(x, y + space) is False: # when any piece of ship is wrong, ship is not addded.
                         print("Invalid space")
                         break
                     places.append((x, y + space)) 
             elif h == "v":
-                for space in range(ship.occupied_spaces()):
+                if x + ship_occupied_spaces > 10:   # check if ship crosses the border 
+                    print("Invalid input (The ship crosses the border)")
+                    continue
+                for space in range(ship_occupied_spaces):
                     if self.check_ship_surrounding(x + space, y) is False: # when any piece of ship is wrong, ship is not addded.
                         print("Invalid space")
                         break
                     places.append((x + space, y))
-            if len(places) == ship.occupied_spaces():
+            if len(places) == ship_occupied_spaces:
                 for place in places:
                         self.board[place[0]][place[1]] = "0"   # if all spaces is correct, ship is added to the board
-
-                
+            self.show_board()
+            
  
     def check_ship_surrounding(self, x, y):
         # check if any surrounding spaces are occupied
