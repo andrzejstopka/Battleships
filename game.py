@@ -17,7 +17,7 @@ class Board():
  
     def check_user_input(self, input):
         ### Checks if the user input is valid ###
-        if len(input) < 3 or len(input) > 5:
+        if len(input) < 2 or len(input) > 5:
             return False
  
         if input[0] not in ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]:
@@ -54,8 +54,8 @@ class Board():
     def place_user_ships(self):
         # Game ships
         for ship in self.ships:
+            self.show_board()
             if ship.name != "Destroyer":
-                user_board.show_board()
                 user_input = input(
                     f"Enter a start coordinates and horizon(h/v) for {ship.name}({ship.occupied_spaces()} spaces) (e.g. A1v): ").capitalize()
                 if self.check_user_input(user_input) is False:
@@ -87,7 +87,7 @@ class Board():
                             self.board[place[0]][place[1]] = "0"   # if all spaces is correct, ship is added to the board
             elif ship.name == "Destroyer":
                 user_input = input(
-                    f"Enter a coordinates for {ship.name}(e.g. A1): ") + "i" # "i" means indifferent to use check_user_input
+                    f"Enter a coordinates for {ship.name}(e.g. A1): ").capitalize() + "i" # "i" means indifferent to use check_user_input
                 if self.check_user_input(user_input) is False:
                     print("Invalid input")
                     continue
@@ -96,7 +96,6 @@ class Board():
                     self.board[x][y] = "0"
                 else:
                     print("Space is already occupied!")
-
             
  
     def check_ship_surrounding(self, x, y):
@@ -113,13 +112,14 @@ class Board():
         return True
 
     def locate_server_ships(self):
+        # Automatically, randomly locate ships 
         for ship in self.ships:
             ship_occupied_spaces = ship.occupied_spaces()
             possible_start_cord = []
             for x in self.board:
-                y_index = 0
+                y_index = 0     # I do this way, because list.index(arg) doesn't work. It find first occurency but every element in the list is the same.
+                x_index = self.board.index(x)
                 for y in x:
-                    x_index = self.board.index(x)
                     if all(self.check_ship_surrounding(x_index + z, y_index) and x_index + z < 10 for z in range(0, ship_occupied_spaces)):
                         possible_start_cord.append((x_index, y_index, "v"))
                     if all(self.check_ship_surrounding(x_index, y_index + z) and y_index + z < 10 for z in range(0, ship_occupied_spaces)): 
@@ -155,20 +155,15 @@ class Ship:
 #                      Main Game                            #
 #############################################################
  
- 
-server_board = Board()
-server_shot_board = Board()
-user_board = Board()
-user_shot_board = Board()
- 
- 
 def main():
+    server_board = Board()
+    server_shot_board = Board()
+    user_board = Board()
+    user_shot_board = Board()
     server_board.locate_server_ships()
-    quit = False
-    while quit == False:
-        user_board.place_user_ships()
+    user_board.place_user_ships()
+    print("Deployed ")
         
- 
  
 if __name__ == "__main__":
     main()
