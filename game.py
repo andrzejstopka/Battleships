@@ -162,7 +162,7 @@ def main():
     user_shot_board = Board()
     server_board.locate_server_ships()
     user_board.place_user_ships()
-    print("Deployed ")
+
         
  
 if __name__ == "__main__":
