@@ -4,6 +4,7 @@ import json
 from game_logic import Board, Ship
 from messages import *
 
+
 class Server:
     host = "127.0.0.1"
     port = 65432
@@ -22,6 +23,8 @@ class Server:
         server_board.locate_server_ships()
         for ship in user_board.ships:
             while True:
+                arrangement = board_arrangement(user_board.board)
+                conn.send(bytes(json.dumps(arrangement), encoding="utf-8"))
                 request = cord_request(ship.name, ship.occupied_spaces())
                 conn.send(bytes(json.dumps(request), encoding="utf-8"))
                 cord = json.loads(conn.recv(1024))
@@ -31,7 +34,7 @@ class Server:
                 conn.send(bytes(json.dumps(server_acceptance), encoding="utf-8"))
                 if result == "Placed":
                     break
-        conn.send(bytes(json.dumps(locating_done()), encoding="utf-8"))
+        # conn.send(bytes(json.dumps(locating_done()), encoding="utf-8"))
 
     def main(self):
         conn = server.get_client()[0]
@@ -45,6 +48,3 @@ class Server:
 if __name__ == "__main__":
     server = Server()
     server.main()
-
-
-    
