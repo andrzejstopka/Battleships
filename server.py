@@ -1,7 +1,7 @@
 import socket
 import json
 
-from game import Board, Ship, main
+from game_logic import Board, Ship
 from messages import *
 
 class Server:
@@ -16,22 +16,35 @@ class Server:
             conn, addr = s.accept()
             return conn, addr
 
-    # def wait_for_invitation(self, msg):
-    #     if msg["type"] == "GAME_INVITATION":
-    #         if self.playing:
-    #             return socket.error
+    def locate_ships(self, conn):
+        server_board = Board()
+        user_board = Board()
+        server_board.locate_server_ships()
+        for ship in user_board.ships:
+            while True:
+                request = cord_request(ship.name, ship.occupied_spaces())
+                conn.send(bytes(json.dumps(request), encoding="utf-8"))
+                cord = json.loads(conn.recv(1024))
+                cord = cord["body"]
+                result = user_board.place_user_ship(ship, cord)
+                server_acceptance = cord_answer(result)
+                conn.send(bytes(json.dumps(server_acceptance), encoding="utf-8"))
+                if result == "Placed":
+                    break
+        conn.send(bytes(json.dumps(locating_done()), encoding="utf-8"))
+
+    def main(self):
+        conn = server.get_client()[0]
+        invitation = json.loads(conn.recv(1024))
+        response = server_game_invitation(self.playing)
+        conn.send(bytes(json.dumps(response), encoding="utf-8"))
+        if response["status"] == 0:
+            self.locate_ships(conn)
 
 
-    # def main(self):
-    #     conn = server.get_client()[0]
-    #     invitation = json.loads(conn.recv(1024))
-    #     response = self.wait_for_invitation(invitation)
-
-
-        
-
-
-server = Server()
+if __name__ == "__main__":
+    server = Server()
+    server.main()
 
 
     

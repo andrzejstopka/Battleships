@@ -15,10 +15,38 @@ def server_game_invitation(playing):
             status = 4
     except socket.error:
         status = 3
-    return json.dumps({"type": "GAME_INVITATION", "status": status, "message": message_by_status[status], "body": None})
+    return {"type": "GAME_INVITATION", "status": status, "message": message_by_status[status], "body": None}
+
+def cord_request(ship_name, ship_spaces):
+    if ship_name != "Destroyer":
+        return {"type": "CORD_REQUEST",  \
+                    "message": f"Enter a start coordinates and horizon(h/v) for {ship_name}({ship_spaces} spaces) (e.g. A1v): "}
+    else:
+        return {"type": "CORD_REQUEST", "message": f"Enter a coordinates for {ship_name}(e.g. A1): "}
+
+def cord_answer(answer):
+    try:
+        if answer == "Placed":
+            status = 0
+            message = message_by_status[status]
+        else:
+            status = 2
+            message = answer
+    except socket.error:
+        status = 3
+        message = message_by_status[status]
+
+    return {"type": "CORD_ACCEPTANCE", "status": status, "message": message, "body": None}
+
+def locating_done():
+    return {"type": "CORD_ACCEPTANCE", "message": "Done"}
+
+def send_ships_cords(row, column, horizon):
+    return {"type": "LOCATE_SHIP", "body": {"row": row, "column": column, "horizon": horizon}}
+
 
 def shot(row, column):
-    return json.dumps({"type": "SHOT", "body": {"row": row, "column": column}})
+    return {"type": "SHOT", "body": {"row": row, "column": column}}
 
 def shot_answer(body):
     try:
@@ -30,25 +58,25 @@ def shot_answer(body):
     except socket.error:
         status = 3
 
-    return json.dumps({"type": "SHOT", "status": message_by_status[status], "message": None, "body": body})
+    return {"type": "SHOT", "status": message_by_status[status], "message": None, "body": body}
 
 def shot_request():
-    return json.dumps({"type": "SHOT_REQUEST", "body": None})
+    return {"type": "SHOT_REQUEST", "body": None}
     
 def server_shot(row, column):
     try:
         status = 0
     except socket.error:
         status = 3
-    return json.dumps({"type": "SHOT_REQUEST", "status": status, "message": message_by_status[status],\
-                            "body": {"row": row, "column": column}})
+    return {"type": "SHOT_REQUEST", "status": status, "message": message_by_status[status],\
+                            "body": {"row": row, "column": column}}
 
 def result_response():
     try:
         status = 0
     except socket.error:
         status = 3
-    return json.dumps({"type": "RESULT", "status": status, "message": message_by_status[status], "body": None})
+    return {"type": "RESULT", "status": status, "message": message_by_status[status], "body": None}
 
 ### DO ZROBIENIA PRZESŁANIE UKŁADU STATKÓW PO SKOŃCZONEJ GRZE
 
