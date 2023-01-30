@@ -51,7 +51,7 @@ def main():
                 cords = json.dumps(ships_cords(cords[0], cords[1], cords[2]))  # convert cords to a message
                 s.send(bytes(cords, encoding="utf-8"))
                 acceptance = json.loads(s.recv(1024)) # check if input was valid 
-
+                print(acceptance["message"])
 
 
 if __name__ == "__main__":
