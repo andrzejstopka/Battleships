@@ -33,7 +33,7 @@ def cord_answer(answer):
     try:
         if answer == "Placed":
             status = 0
-            message = message_by_status[status]
+            message = "Placed"
         else:
             status = 2
             message = answer

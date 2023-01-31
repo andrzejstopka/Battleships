@@ -42,16 +42,22 @@ def main():
         input("You are now connected to the Battleship server, press any key to continue")
         s.send(bytes(game_invitation, encoding="UTF-8"))
         acceptance = json.loads(s.recv(1024))   
-        if acceptance["status"] == 0:   # if status is equal 0 it means that server is ready to game
+        if acceptance["status"] == 0:       # if status is equal 0 it means that server is ready to game
             while True:
                 board_arrangement = json.loads(s.recv(1024))
-                show_board(board_arrangement["body"])   # print actual state of the board
-                cord_request = json.loads(s.recv(1024))  # it is request from server to give ship cords you want
-                cords = enter_cord(cord_request["message"])  # input 
-                cords = json.dumps(ships_cords(cords[0], cords[1], cords[2]))  # convert cords to a message
+                show_board(board_arrangement["body"])       # print actual state of the board
+                cord_request = json.loads(s.recv(1024))     # it is request from server to give ship cords you want
+                cords = enter_cord(cord_request["message"])     # input 
+                cords = json.dumps(ships_cords(cords[0], cords[1], cords[2]))       # convert cords to a message
                 s.send(bytes(cords, encoding="utf-8"))
-                acceptance = json.loads(s.recv(1024)) # check if input was valid 
-                print(acceptance["message"])
+                cord_acceptance = json.loads(s.recv(1024))        # check if input was valid 
+                if cord_acceptance["message"] == "Done":
+                    print("Locating is done")
+                    break
+                else:
+                    print(cord_acceptance["message"])
+
+
 
 
 if __name__ == "__main__":

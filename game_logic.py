@@ -56,19 +56,19 @@ class Board():
         # checked places, ship is not added when is checked because it would corrupt check_ship_surrounding function
         if h == "h":
             if y + ship_occupied_spaces > 10:   # check if ship crosses the border
-                return "Invalid input (The ship crosses the border)"
+                return "Invalid input (The ship crosses the border), try again"
             for space in range(ship_occupied_spaces):
                 # when any piece of ship is wrong, ship is not addded.
                 if self.check_ship_surrounding(x, y + space) is False:
-                    return "Invalid cords"
+                    return "Invalid cords, try again"
                 places.append((x, y + space))
         elif h == "v":
             if x + ship_occupied_spaces > 10:  # check if ship crosses the border
-                return "Invalid input (The ship crosses the border)"
+                return "Invalid input (The ship crosses the border), try again"
             for space in range(ship_occupied_spaces):
                 # when any piece of ship is wrong, ship is not addded.
                 if self.check_ship_surrounding(x + space, y) is False:
-                    return "Invalid cords"
+                    return "Invalid cords, try again"
                 places.append((x + space, y))
         elif h == "i":
             if self.check_ship_surrounding(x, y) is False:
