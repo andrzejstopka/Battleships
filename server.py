@@ -17,37 +17,38 @@ class Server:
             conn, addr = s.accept()
             return conn, addr
 
-    def locate_ships(self, conn, user_board, ship):
+    def locate_ships(self, conn, user_board):
         ## It get inputs from a client to locate him ships 
-        
-        while True:
-            arrangement = board_arrangement(user_board.board)       # convert user board to message
-            conn.send(bytes(json.dumps(arrangement), encoding="utf-8"))
-            request = cord_request(ship.name, ship.occupied_spaces())       # convert ship info to message
-            conn.send(bytes(json.dumps(request), encoding="utf-8"))
-            cord = json.loads(conn.recv(1024))          # get user info
-            cord = cord["body"]         # cords in message body
-            result = user_board.place_user_ship(ship, cord)  
-            # insert cords to function to place ship on the board if input is valid
-            if ship is user_board.ships[-1]:
-                result = "Done"
-            server_acceptance = cord_answer(result)    # convert to message if input is valid
-            conn.send(bytes(json.dumps(server_acceptance), encoding="utf-8"))
-            if result == "Placed" or result == "Done":          # if input is valid, go to the next ship
-                break
+        for ship in user_board.ships:
+            while True:
+                arrangement = board_arrangement(user_board.board)       # convert user board to message
+                conn.send(bytes(json.dumps(arrangement), encoding="utf-8"))
+                accept_arrangement = conn.recv(1024)
+                request = cord_request(ship.name, ship.occupied_spaces())       # convert ship info to message
+                conn.send(bytes(json.dumps(request), encoding="utf-8"))
+                cord = json.loads(conn.recv(1024))          # get user info
+                cord = cord["body"]         # cords in message body
+                result = user_board.place_user_ship(ship, cord)  
+                # insert cords to function to place ship on the board if input is valid
+                if ship is user_board.ships[-1]:
+                    result = "Done"
+                server_acceptance = cord_answer(result)    # convert to message if input is valid
+                conn.send(bytes(json.dumps(server_acceptance), encoding="utf-8"))
+                if result == "Placed" or result == "Done":          # if input is valid, go to the next ship
+                    break
+
 
     def main(self):
         conn = server.get_client()[0]       # get_client return connection and address, we need only connection
         invitation = json.loads(conn.recv(1024))        # when server receive invitation, it return right answer
-        print(invitation)
         response = server_game_invitation(self.playing)         # convert to message, if self.playing is True it refuse a game
         conn.send(bytes(json.dumps(response), encoding="utf-8"))
         if response["status"] == 0:         # status 0 means all is right
             server_board = Board()
             user_board = Board()
             server_board.locate_server_ships()
-            for ship in user_board.ships:
-                self.locate_ships(conn, user_board, ship)
+            self.locate_ships(conn, user_board)
+            
 
 
 if __name__ == "__main__":

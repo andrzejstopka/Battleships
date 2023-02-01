@@ -21,6 +21,10 @@ def server_game_invitation(playing):
 def board_arrangement(arrangement):
     return {"type": "BOARD_ARRANGEMENT", "body": arrangement}
 
+def accept_board_arrangement():
+    status = 0
+    return {"type": "BOARD_ARRANGEMENT", "status": status, "message": message_by_status[status], "body": None}
+
 def cord_request(ship_name, ship_spaces):
     if ship_name != "Destroyer":
         return {"type": "CORD_REQUEST",

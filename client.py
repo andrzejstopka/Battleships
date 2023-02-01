@@ -1,6 +1,7 @@
 import json
 import socket
 
+
 from messages import *
 
 
@@ -46,6 +47,7 @@ def main():
             while True:
                 board_arrangement = json.loads(s.recv(1024))
                 show_board(board_arrangement["body"])       # print actual state of the board
+                s.send(bytes(json.dumps(accept_board_arrangement()), encoding="utf-8"))
                 cord_request = json.loads(s.recv(1024))     # it is request from server to give ship cords you want
                 cords = enter_cord(cord_request["message"])     # input 
                 cords = json.dumps(ships_cords(cords[0], cords[1], cords[2]))       # convert cords to a message
@@ -56,7 +58,6 @@ def main():
                     break
                 else:
                     print(cord_acceptance["message"])
-
 
 
 
