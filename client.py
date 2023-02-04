@@ -5,6 +5,16 @@ import socket
 from messages import *
 
 
+def show_board(arrangement):
+    # it takes list of lists (board object) as an arrangement and show actual state of the board
+    letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
+    board_row = 0
+    print("    1    2    3    4    5    6    7    8    9    10")
+    for x in letters:
+        print(x, arrangement[board_row])
+        board_row += 1
+
+
 def enter_cord(cord_request):
     # give cords where you want to place your ship
     cords = input(cord_request).capitalize()  
@@ -21,15 +31,13 @@ def enter_cord(cord_request):
             cords = (cords[0], cords[1], cords[2])
     return cords
 
+def shoot(shot_request):
+    field = input(shot_request).capitalize()
+    if field[1:3] == "10":
+        return shoot_message(field[0], field[1:3])
+    else:
+        return shoot_message(field[0], field[1])
 
-def show_board(arrangement):
-    # it takes list of lists (board object) as an arrangement and show actual state of the board
-    letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
-    board_row = 0
-    print("    1    2    3    4    5    6    7    8    9    10")
-    for x in letters:
-        print(x, arrangement[board_row])
-        board_row += 1
 
 
 HOST = "127.0.0.1"
@@ -58,6 +66,15 @@ def main():
                     break
                 else:
                     print(cord_acceptance["message"])
+            while True:
+                server_shoot_request = json.loads(s.recv(1024))
+                shot_field = shoot(server_shoot_request["message"])
+                s.send(bytes(json.dumps(shot_field), encoding="utf-8"))
+                shoot_response = json.loads(s.recv(1024))
+                print(shoot_response["body"])
+                if shoot_response["body"] == "Miss":
+                    break
+       
 
 
 

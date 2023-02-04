@@ -56,15 +56,17 @@ def ships_cords(row, column, horizon):
     return {"type": "LOCATE_SHIP", "body": {"row": row, "column": column, "horizon": horizon}}
 
 
-def shot(row, column):
+def shot_request():
+    return {"type": "SHOT_REQUEST", "message": "Enter the field (e.g. A1)", "body": None}
+
+def shoot_message(row, column):
     return {"type": "SHOT", "body": {"row": row, "column": column}}
 
 
 def shot_answer(body):
     try:
-        if body == "Out of board":
+        if body == "Out of the board, try again":
             status = 2
-            body = None
         else:
             status = 0
     except socket.error:
@@ -72,9 +74,6 @@ def shot_answer(body):
 
     return {"type": "SHOT", "status": message_by_status[status], "message": None, "body": body}
 
-
-def shot_request():
-    return {"type": "SHOT_REQUEST", "body": None}
 
 
 def server_shot(row, column):
@@ -97,3 +96,4 @@ def result_response():
 
 
 game_invitation = json.dumps({"type": "GAME_INVITATION", "body": None})
+

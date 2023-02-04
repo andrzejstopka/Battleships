@@ -31,28 +31,36 @@ class Board():
 
         return True
 
-    def convert_user_input(self, input):
+    def convert_user_input(self, input, shot):
         ### Converts the user input to a coordinate example. A1 -> 0, 0, B10 -> 1, 9 ###
-
         length = len(input)
-        if length == 3 and input[2] in ["v", "h"]:
-            return ord(input[0]) - 65, int(input[1]) - 1, input[2]
-        elif length == 3 and input[2] == "i":
-            return ord(input[0]) - 65, int(input[1]) - 1, input[2]
-        elif length == 4 and input[3] in ["v", "h"]:
-            number = input[1] + input[2]
-            return ord(input[0]) - 65, int(number) - 1, input[3]
-        elif length == 4 and input[3] == "i":
-            number = input[1] + input[2]
-            return ord(input[0]) - 65, int(number) - 1, input[3]
+        if shot:
+            try:
+                if length == 2:
+                    return ord(input[0]) - 65, int(input[1])
+                elif length == 3:
+                    return ord(input[0]) - 65, int(input[1:3])
+            except ValueError:
+                return False, False       
+        else:
+            if length == 3 and input[2] in ["v", "h"]:
+                return ord(input[0]) - 65, int(input[1]) - 1, input[2]
+            elif length == 3 and input[2] == "i":
+                return ord(input[0]) - 65, int(input[1]) - 1, input[2]
+            elif length == 4 and input[3] in ["v", "h"]:
+                number = input[1] + input[2]
+                return ord(input[0]) - 65, int(number) - 1, input[3]
+            elif length == 4 and input[3] == "i":
+                number = input[1] + input[2]
+                return ord(input[0]) - 65, int(number) - 1, input[3]
 
     def place_user_ship(self, ship, cord):
         cord = cord["row"] + cord["column"] + cord["horizon"]
         if self.check_user_input(cord) is False:
             return "Invalid cords, please try again"
-        x, y, h = self.convert_user_input(cord)  # h - horizon
+        x, y, h = self.convert_user_input(cord, False)  # h - horizon
         ship_occupied_spaces = ship.occupied_spaces()
-        places = []
+        ship.places = []
         # checked places, ship is not added when is checked because it would corrupt check_ship_surrounding function
         if h == "h":
             if y + ship_occupied_spaces > 10:   # check if ship crosses the border
@@ -61,7 +69,7 @@ class Board():
                 # when any piece of ship is wrong, ship is not addded.
                 if self.check_ship_surrounding(x, y + space) is False:
                     return "Invalid cords, try again"
-                places.append((x, y + space))
+                ship.places.append((x, y + space))
         elif h == "v":
             if x + ship_occupied_spaces > 10:  # check if ship crosses the border
                 return "Invalid input (The ship crosses the border), try again"
@@ -69,13 +77,13 @@ class Board():
                 # when any piece of ship is wrong, ship is not addded.
                 if self.check_ship_surrounding(x + space, y) is False:
                     return "Invalid cords, try again"
-                places.append((x + space, y))
+                ship.places.append((x + space, y))
         elif h == "i":
             if self.check_ship_surrounding(x, y) is False:
                 return "Space is already occupied, try again"
-            places.append((x, y))
-        if len(places) == ship_occupied_spaces:
-            for place in places:
+            ship.places.append((x, y))
+        if len(ship.places) == ship_occupied_spaces:
+            for place in ship.places:
                 # if all spaces is correct, ship is added to the board
                 self.board[place[0]][place[1]] = "0"
             return "Placed"
@@ -114,12 +122,35 @@ class Board():
             if h == "v":
                 for z in range(ship_occupied_spaces):
                     self.board[x + z][y] = "0"
+                    ship.places.append((x + z, y))
             elif h == "h":
                 for z in range(ship_occupied_spaces):
                     self.board[x][y + z] = "0"
+                    ship.places.append((x + z, y))
+
+    def count_ships_elements(self):
+        return sum(row.count(1) for row in self.board)
+
+    def check_shoot(self, cords):
+        x, y = self.convert_user_input(cords, True)
+        if x is False:
+            return "Out of the board, try again"
+        for ship in self.ships:
+            if (x, y) in ship.places:
+                self.board[x][y] = "X"
+                ship.places.remove((x, y))
+                if len(ship.places) == 0:
+                    return "Sinking"
+                else:
+                    return "Hit"
+            else:
+                self.board[x][y] = "/"
+                return "Miss"
+        
 
 
 class Ship:
+    places = []
     def __init__(self, name):
         self.name = name
 
