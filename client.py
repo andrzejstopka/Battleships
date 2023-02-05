@@ -16,20 +16,25 @@ def show_board(arrangement):
 
 
 def enter_cord(cord_request):
-    # give cords where you want to place your ship
-    cords = input(cord_request).capitalize()  
-    # cord_request is e.g "Enter a start coordinates and horizon(h/v) for {ship_name}({ship_spaces} spaces) (e.g. A1v): "
-    if cords[1:3] == "10":  
-        if "Destroyer" in cord_request:
-            cords = (cords[0], cords[1:3], "i") # horizon for 1-place ship is not needed
-        else:
-            cords = (cords[0], cords[1:3], cords[-1])
-    else:
-        if "Destroyer" in cord_request:
-            cords = (cords[0], cords[1], "i")
-        else:
-            cords = (cords[0], cords[1], cords[2])
-    return cords
+    while True:
+        # give cords where you want to place your ship
+        cords = input(cord_request).capitalize()  
+        # cord_request is e.g "Enter a start coordinates and horizon(h/v) for {ship_name}({ship_spaces} spaces) (e.g. A1v): "
+        try:
+            if cords[1:3] == "10":  
+                if "Destroyer" in cord_request:
+                    cords = (cords[0], cords[1:3], "i") # horizon for 1-place ship is not needed
+                else:
+                    cords = (cords[0], cords[1:3], cords[-1])
+            else:
+                if "Destroyer" in cord_request:
+                    cords = (cords[0], cords[1], "i")
+                else:
+                    cords = (cords[0], cords[1], cords[2])
+        except IndexError:
+            print("Invalid input length, try again")
+            continue
+        return cords
 
 def shoot(shot_request):
     field = input(shot_request).capitalize()
@@ -72,6 +77,7 @@ def main():
                 s.send(bytes(json.dumps(shot_field), encoding="utf-8"))
                 shoot_response = json.loads(s.recv(1024))
                 print(shoot_response["body"])
+                show_board(shoot_response["message"])
                 if shoot_response["body"] == "Miss":
                     break
        

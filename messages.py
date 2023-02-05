@@ -48,22 +48,18 @@ def cord_answer(answer):
     return {"type": "CORD_ACCEPTANCE", "status": status, "message": message, "body": None}
 
 
-# def locating_done():
-#     return {"type": "CORD_ACCEPTANCE", "message": "Done"}
-
-
 def ships_cords(row, column, horizon):
     return {"type": "LOCATE_SHIP", "body": {"row": row, "column": column, "horizon": horizon}}
 
 
 def shot_request():
-    return {"type": "SHOT_REQUEST", "message": "Enter the field (e.g. A1)", "body": None}
+    return {"type": "SHOT_REQUEST", "message": "Enter the field (e.g. A1): ", "body": None}
 
 def shoot_message(row, column):
     return {"type": "SHOT", "body": {"row": row, "column": column}}
 
 
-def shot_answer(body):
+def shot_answer(body, shoot_board_arrangement):
     try:
         if body == "Out of the board, try again":
             status = 2
@@ -72,7 +68,7 @@ def shot_answer(body):
     except socket.error:
         status = 3
 
-    return {"type": "SHOT", "status": message_by_status[status], "message": None, "body": body}
+    return {"type": "SHOT", "status": message_by_status[status], "message": shoot_board_arrangement, "body": body}
 
 
 

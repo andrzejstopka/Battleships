@@ -43,9 +43,10 @@ class Server:
             shoot_result = json.loads(conn.recv(1024))
             cords = shoot_result["body"]["row"] + shoot_result["body"]["column"]
             result = server_board.check_shoot(cords)
-            shot_response = shot_answer(result)
+            server_shoot_board = board_arrangement(server_board.shoot_board)["body"]
+            shot_response = shot_answer(result, server_shoot_board)
             conn.send(bytes(json.dumps(shot_response), encoding="utf-8"))
-            if result == "Miss":
+            if result == "Miss": #if shoot result is hit, sinking or invalid user have another chance
                 break
             
 

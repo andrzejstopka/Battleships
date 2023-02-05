@@ -6,15 +6,8 @@ class Board():
         self.board = [["~"] * 10 for _ in range(10)]
         self.ships = [Ship("Battleship"), Ship("Cruiser"), Ship("Cruiser"), Ship("Submarine"),
                       Ship("Submarine"), Ship("Submarine"), Ship("Destroyer"), Ship("Destroyer"), Ship("Destroyer"), Ship("Destroyer")]
-
-    def show_board(self):
-        letters = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"]
-        board_row = 0
-        print("    1    2    3    4    5    6    7    8    9    10")
-        for x in letters:
-            print(x, self.board[board_row])
-            board_row += 1
-
+        self.shoot_board = [["~"] * 10 for _ in range(10)]
+    
     def check_user_input(self, input):
         ### Checks if the user input is valid ###
         if len(input) < 2 or len(input) > 5:
@@ -37,9 +30,9 @@ class Board():
         if shot:
             try:
                 if length == 2:
-                    return ord(input[0]) - 65, int(input[1])
+                    return ord(input[0]) - 65, int(input[1]) - 1
                 elif length == 3:
-                    return ord(input[0]) - 65, int(input[1:3])
+                    return ord(input[0]) - 65, int(input[1:3]) - 1
             except ValueError:
                 return False, False       
         else:
@@ -60,7 +53,7 @@ class Board():
             return "Invalid cords, please try again"
         x, y, h = self.convert_user_input(cord, False)  # h - horizon
         ship_occupied_spaces = ship.occupied_spaces()
-        ship.places = []
+        possible_places = []
         # checked places, ship is not added when is checked because it would corrupt check_ship_surrounding function
         if h == "h":
             if y + ship_occupied_spaces > 10:   # check if ship crosses the border
@@ -69,7 +62,7 @@ class Board():
                 # when any piece of ship is wrong, ship is not addded.
                 if self.check_ship_surrounding(x, y + space) is False:
                     return "Invalid cords, try again"
-                ship.places.append((x, y + space))
+                possible_places.append((x, y + space))
         elif h == "v":
             if x + ship_occupied_spaces > 10:  # check if ship crosses the border
                 return "Invalid input (The ship crosses the border), try again"
@@ -77,15 +70,16 @@ class Board():
                 # when any piece of ship is wrong, ship is not addded.
                 if self.check_ship_surrounding(x + space, y) is False:
                     return "Invalid cords, try again"
-                ship.places.append((x + space, y))
+                possible_places.append((x + space, y))
         elif h == "i":
             if self.check_ship_surrounding(x, y) is False:
                 return "Space is already occupied, try again"
-            ship.places.append((x, y))
+            possible_places.append((x, y))
         if len(ship.places) == ship_occupied_spaces:
-            for place in ship.places:
+            for place in possible_places.places:
                 # if all spaces is correct, ship is added to the board
                 self.board[place[0]][place[1]] = "0"
+                ship.places.append(place[0], place[1])
             return "Placed"
 
     def check_ship_surrounding(self, x, y):
@@ -126,33 +120,36 @@ class Board():
             elif h == "h":
                 for z in range(ship_occupied_spaces):
                     self.board[x][y + z] = "0"
-                    ship.places.append((x + z, y))
+                    ship.places.append((x, y + z))
 
     def count_ships_elements(self):
+        # check if player has at least one ship
         return sum(row.count(1) for row in self.board)
 
     def check_shoot(self, cords):
         x, y = self.convert_user_input(cords, True)
-        if x is False:
+        if x is False:    # convert_user_input return (False, False) when space is invalid
             return "Out of the board, try again"
+        elif self.shoot_board[x][y] == "/" or self.shoot_board[x][y] == "X":
+            return "You have already shot there, try again"
         for ship in self.ships:
             if (x, y) in ship.places:
-                self.board[x][y] = "X"
-                ship.places.remove((x, y))
+                self.shoot_board[x][y] = "X"  # check if place is element of ship
+                ship.places.remove((x, y))  
                 if len(ship.places) == 0:
                     return "Sinking"
                 else:
                     return "Hit"
             else:
-                self.board[x][y] = "/"
-                return "Miss"
+                self.shoot_board[x][y] = "/"  # "/" means that the place is hit but there was no ship
+        return "Miss"
         
 
 
 class Ship:
-    places = []
     def __init__(self, name):
         self.name = name
+        self.places = []
 
     def occupied_spaces(self):
         if self.name == "Battleship":
